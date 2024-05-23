@@ -27,8 +27,27 @@ app_license = "mit"
 # include js in page
 # page_js = {"page" : "public/js/file.js"}
 
+
+
+fixtures = [
+    {"dt": "Custom Field", "filters": {"module": "meril"}},
+	{"dt":"Print Format","filters":{"module": "meril"}}
+    
+]
+
+
+
+
+
+
 # include js in doctype views
-# doctype_js = {"doctype" : "public/js/doctype.js"}
+doctype_js = {
+                "Payroll Entry" : "public/js/payroll.js",
+                "Employee Benefit Claim" : "public/js/employee_benefit_claim.js",
+                "Employee" : "public/js/employee.js",
+                "Salary Structure Assignment": "public/js/salary_structure_assignment.js"
+              
+              }
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
@@ -114,9 +133,17 @@ app_license = "mit"
 # ---------------
 # Override standard doctype classes
 
-# override_doctype_class = {
-# 	"ToDo": "custom_app.overrides.CustomToDo"
-# }
+override_doctype_class = {
+
+    # "Payroll Entry":"meril.meril.overrides.payroll.CustomPayrollEntry",
+
+    # "Salary Slip":"meril.meril.overrides.accual_benefit_claim.CustomSalarySlip",
+    "Employee Benefit Claim":"meril.meril.overrides.benefit_claim.CustomEmployeeBenefitClaim",
+	# "Employee": "meril.meril.overrides.employee.CustomEmployee",
+    "Salary Slip":"meril.meril.overrides.salary_slip.CustomSalarySlip",
+    "Salary Structure Assignment":"meril.meril.overrides.salary_structure_assignment.CustomSalaryStructureAssignment"
+    # "Salary Slip": "meril.meril.overrides.salary_slip.CustomSalarySlip"
+}
 
 # Document Events
 # ---------------
@@ -128,6 +155,25 @@ app_license = "mit"
 # 		"on_cancel": "method",
 # 		"on_trash": "method"
 # 	}
+# }
+
+
+
+
+# doc_events = {
+	
+#     # "Employee Benefit Claim": 
+#     # {
+#     #     # "before_save": "meril.meril.overrides.salary_slip.get_employee_benefit",
+#     #     "validate": "meril.meril.overrides.salary_slip.employee_benefit_validate",
+        
+# 	# },
+#     # "Payroll Entry":
+#     # {
+#     #     "validate":"meril.meril.overrides.payroll.payrollset"
+
+#     # }
+    
 # }
 
 # Scheduled Tasks
@@ -227,3 +273,6 @@ app_license = "mit"
 # 	"Logging DocType Name": 30  # days to retain logs
 # }
 
+# // salary_slip = frappe.get_doc("Salary Slip")
+# // data  = salary_slip.data
+# // component_value = salary_slip.eval_condition_and_formula(Salary Slip=>Salary Structure=>bonus formula("B*0.2"),data)

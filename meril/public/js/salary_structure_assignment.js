@@ -1,18 +1,7 @@
 
 
 frappe.ui.form.on('Salary Structure Assignment', {
-
-
-
     
-
-
-
-
-
-
-
-
 
 
     refresh(frm) {
@@ -21,15 +10,12 @@ frappe.ui.form.on('Salary Structure Assignment', {
         if (frm.doc.employee && frm.doc.salary_structure && frm.doc.docstatus==1) 
             {
 
-
-            
-
-            
+                console.log("yes")
 
 
 
                 
-    
+                
             let salary_breakup = `
                 <table class="table table-bordered small"> 
                     <thead> 
@@ -42,13 +28,30 @@ frappe.ui.form.on('Salary Structure Assignment', {
                     <tbody id="salary_breakup_body">   
                     </tbody>
                     <tfoot>
-                        <tr>
-                            <th>Total</th>
-                            <th id="total_monthly_earnings" class="text-right"></th>
-                            <th id="total_annual_earnings" class="text-right"></th>
-                        </tr>
+                       
                     </tfoot>
                 </table>`;
+
+                
+
+                
+
+                let reimbursement_breakup = `
+                <table class="table table-bordered small"> 
+                    <thead> 
+                        <tr> 
+                            <th style="width: 16%">Reimbursements</th> 
+                            <th style="width: 16%" class="text-right">Monthly Amount</th> 
+                            <th style="width: 16%" class="text-right">Annual Amount</th> 
+                        </tr> 
+                    </thead> 
+                    <tbody id="reimbursement_breakup_body">   
+                    </tbody>
+                    <tfoot>
+                       
+                    </tfoot>
+                </table>`;
+                    
         
             let deduction_breakup = `
                 <table class="table table-bordered small"> 
@@ -63,7 +66,7 @@ frappe.ui.form.on('Salary Structure Assignment', {
                     </tbody>
                     <tfoot>
                         <tr>
-                            <th>Total</th>
+                            <th>Total (Cost to Company)</th>
                             <th id="total_monthly_deductions" class="text-right"></th>
                             <th id="total_annual_deductions" class="text-right"></th>
                         </tr>
@@ -71,10 +74,17 @@ frappe.ui.form.on('Salary Structure Assignment', {
                 </table>`;
         
             document.getElementById("ctc_preview").innerHTML = salary_breakup;
+            document.getElementById("reimbursement_preview").innerHTML = reimbursement_breakup;
+
+
             document.getElementById("deduction_preview").innerHTML = deduction_breakup;
+            
+            
     
             let tableBody = document.getElementById("salary_breakup_body");
+            let tableBody2 = document.getElementById("reimbursement_breakup_body");
             let tableBody1 = document.getElementById("deduction_breakup_body");
+            
     
             let totalMonthlyEarnings = 0;
             let totalAnnualEarnings = 0;
@@ -82,44 +92,25 @@ frappe.ui.form.on('Salary Structure Assignment', {
             let totalMonthlyDeductions = 0;
             let totalAnnualDeductions = 0;
     
-            // let array = [];
-            // $.each(frm.doc.custom_employee_reimbursements, function(i, component) {
-            //     // console.log(component.reimbursements);
-            //     array.push(component.reimbursements);
-    
-            //     // Add array elements to the salary_breakup_body
-            //     let newRow = tableBody.insertRow();
-            //     let componentCell = newRow.insertCell();
-            //     componentCell.textContent = component.reimbursements;
-    
-            //     let amountCell = newRow.insertCell();
-            //     amountCell.className = "text-right";
-            //     amountCell.textContent = component.monthly_total_amount; // Assuming there is an 'amount' field in the component
-    
-            //     let annualAmountCell = newRow.insertCell();
-            //     annualAmountCell.className = "text-right";
-            //     annualAmountCell.textContent = component.monthly_total_amount * 12; // Assuming the 'amount' field is monthly
-    
-            //     totalMonthlyEarnings += component.monthly_total_amount;
-            //     totalAnnualEarnings += component.monthly_total_amount * 12;
-            // });
+            
+           
     
             frappe.call({
+                
                 method: "hrms.payroll.doctype.salary_structure.salary_structure.make_salary_slip",
                 args: {
-                    source_name: "Meril 2024-2025",
+                    source_name: frm.doc.salary_structure,
                     employee: frm.doc.employee,
                     print_format: 'Salary Slip Standard for CTC',
                     
                 },
                 callback: function(response) {
-                    console.log(response.message, 'iiiii');
+                    
 
               
         
                     $.each(response.message.earnings, function(i, v) {
-                        console.log(v.salary_component)
-                        console.log(v.amount)
+                       
     
                         frappe.call({
                             method: "frappe.client.get",
@@ -130,12 +121,17 @@ frappe.ui.form.on('Salary Structure Assignment', {
                             },
                             callback: function(res) {
                                 if (res.message && res.message.custom_is_part_of_ctc == 1) {
-                                    // console.log(res.message.name);
+                                    
+
+                                    // console.log(v.salary_component)
+                                    // console.log(v.amount)
         
                                     let newRow = tableBody.insertRow();
         
                                     let componentCell = newRow.insertCell();
                                     componentCell.textContent = res.message.name;
+
+                                    console.log(res.message.name)
         
                                     let amountCell = newRow.insertCell();
                                     amountCell.className = "text-right";
@@ -148,8 +144,10 @@ frappe.ui.form.on('Salary Structure Assignment', {
                                     totalMonthlyEarnings += v.amount;
                                     totalAnnualEarnings += v.amount * 12;
         
-                                    document.getElementById("total_monthly_earnings").textContent = totalMonthlyEarnings;
-                                    document.getElementById("total_annual_earnings").textContent = totalAnnualEarnings;
+                                    
+
+
+                                    
                                 }
                             }
                         });
@@ -157,27 +155,7 @@ frappe.ui.form.on('Salary Structure Assignment', {
 
 
 
-                    let array = [];
-                    $.each(frm.doc.custom_employee_reimbursements, function(i, component) {
-                        // console.log(component.reimbursements);
-                        array.push(component.reimbursements);
-            
-                        // Add array elements to the salary_breakup_body
-                        let newRow = tableBody.insertRow();
-                        let componentCell = newRow.insertCell();
-                        componentCell.textContent = component.reimbursements;
-            
-                        let amountCell = newRow.insertCell();
-                        amountCell.className = "text-right";
-                        amountCell.textContent = component.monthly_total_amount; // Assuming there is an 'amount' field in the component
-            
-                        let annualAmountCell = newRow.insertCell();
-                        annualAmountCell.className = "text-right";
-                        annualAmountCell.textContent = component.monthly_total_amount * 12; // Assuming the 'amount' field is monthly
-            
-                        totalMonthlyEarnings += component.monthly_total_amount;
-                        totalAnnualEarnings += component.monthly_total_amount * 12;
-                    });
+                   
 
                     
 
@@ -214,8 +192,8 @@ frappe.ui.form.on('Salary Structure Assignment', {
                                     totalMonthlyDeductions += k.amount;
                                     totalAnnualDeductions += k.amount * 12;
                                     
-                                    document.getElementById("total_monthly_deductions").textContent = totalMonthlyDeductions;
-                                    document.getElementById("total_annual_deductions").textContent = totalAnnualDeductions;
+                                    document.getElementById("total_monthly_deductions").textContent = totalMonthlyDeductions+totalMonthlyEarnings;
+                                    document.getElementById("total_annual_deductions").textContent = totalAnnualDeductions+totalAnnualEarnings;
                                 }
                             }
                         });
@@ -236,6 +214,26 @@ frappe.ui.form.on('Salary Structure Assignment', {
 
 
                 }
+            });
+
+
+            $.each(frm.doc.custom_employee_reimbursements, function(i, component) {
+                
+                let newRow = tableBody2.insertRow();
+                let componentCell = newRow.insertCell();
+                componentCell.textContent = component.reimbursements;
+                console.log(component.reimbursements)
+    
+                let amountCell = newRow.insertCell();
+                amountCell.className = "text-right";
+                amountCell.textContent = component.monthly_total_amount; // Assuming there is an 'amount' field in the component
+    
+                let annualAmountCell = newRow.insertCell();
+                annualAmountCell.className = "text-right";
+                annualAmountCell.textContent = component.monthly_total_amount * 12; // Assuming the 'amount' field is monthly
+    
+                totalMonthlyEarnings += component.monthly_total_amount;
+                totalAnnualEarnings += component.monthly_total_amount * 12;
             });
         }
 
@@ -580,29 +578,59 @@ custom__car_perquisite(frm)
                 
 //                 if(frm.doc.custom_nps_amount>nps_value)
 //                 {
-//                     msgprint("You cant enter amount greater than "+nps_value)
-//                     frm.set_value("custom_nps_amount",undefined)
-//                     frm.set_value("custom_nps_percentage",undefined)
+//                     msgprint("Please Enter amount greater than "+nps_value)
+//                     frm.set_value("custom_nps_amount",0)
+//                     frm.set_value("custom_nps_percentage",0)
                     
 //                 }
                 
-//                 // else
-//                 // {
+//                 else
+//                 {
                     
                     
-//                 //     // if(frm.doc.custom_nps_amount<=nps_value)
-//                 //     // {
+//                     if(frm.doc.custom_nps_amount<=nps_value)
+//                     {
+//                         if(frm.doc.custom_nps_amount==nps_value)
+//                             {
+//                                 frm.set_value("custom_nps_percentage",10)
+
+//                             }
+
+
+//                             else
+//                             {
+
+//                             }
+
                        
                         
                     
-//                 //     //     // frm.set_value("custom_nps_percent",10)
-//                 //     // }
+                        
+//                     }
  
-//                 // }
+//                 }
                 
 //             }
         
 //     },
+
+
+custom_nps_amount(frm) {
+    if (frm.doc.custom_is_nps == 1 && frm.doc.custom_nps_amount) {
+        var amount = (frm.doc.base / 12 * 35) / 100;
+        var nps_value = (amount * 10) / 100;
+
+        if (frm.doc.custom_nps_amount > nps_value) {
+            msgprint("Please enter an amount less than or equal to " + nps_value);
+            frm.set_value("custom_nps_amount", 0);
+            frm.set_value("custom_nps_percentage", 0);
+        } else {
+            // Calculate custom NPS percentage
+            var custom_percentage = (frm.doc.custom_nps_amount / amount) * 100;
+            frm.set_value("custom_nps_percentage", custom_percentage);
+        }
+    }
+},
 
 })
 
